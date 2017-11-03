@@ -4,6 +4,8 @@ import PropTypes from 'prop-types';
 
 class ResizableComponent extends Component {
 
+  create = false;
+
   constructor(props) {
     super(props);
     this.state = {
@@ -39,6 +41,20 @@ class ResizableComponent extends Component {
 			// Ghost Resizing
 			allowGhostResize: this.props.options.allowGhostResize || false
     };
+  }
+
+  componentDidUpdate(){
+    if (!this.create){
+      this.create = true;
+      this.setState({
+          boxWidth : this.props.width,
+          boxHeight: this.props.height,
+          initialBoxHeight: this.props.height,
+          initialBoxWidth: this.props.height,
+          originalBoxWidth: this.props.width,
+          originalBoxHeight: this.props.height,
+      });
+    }
   }
 
 	componentDidMount() {
