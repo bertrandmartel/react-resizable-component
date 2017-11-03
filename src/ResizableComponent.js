@@ -9,38 +9,39 @@ class ResizableComponent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      // Mouse events
+			// Mouse events
 			mouseHeldDown: false,
 			originalY: 0,
 			originalX: 0,
 
 			// Dimensions of box
-			direction: this.props.direction,
-			initialBoxHeight: this.props.height,
-			initialBoxWidth: this.props.width,
-			boxHeight: this.props.height,
-			boxWidth: this.props.width,
-			minHeight: this.props.options.minHeight || this.props.height,
-			minWidth: this.props.options.minWidth || this.props.width,
-			maxHeight: this.props.options.maxHeight || Infinity,
-			maxWidth: this.props.options.maxWidth || Infinity,
-			lockAspectRatio: this.props.options.lockAspectRatio || false,
-			fullWidth: this.props.options.fullWidth || false,
+			direction: props.direction,
+			initialBoxHeight: props.height,
+			initialBoxWidth: props.width,
+			boxHeight: props.height,
+			boxWidth: props.width,
+			minHeight: props.options.minHeight ? props.options.minHeight : props.height,
+			minWidth: props.options.minWidth ? props.options.minWidth : props.width,
+			maxHeight: props.options.maxHeight ? props.options.maxHeight : Infinity,
+			maxWidth: props.options.maxWidth ? props.options.maxWidth : Infinity,
+			lockAspectRatio: props.options.lockAspectRatio ? props.options.lockAspectRatio : false,
 
 			// Stepping of resizing
-			step: this.props.options.step || 1,
+			step: props.options.step ? props.options.step : 1,
 			currStepY: 0,
 			currStepX: 0,
-			steppingMargin: this.props.steppingMargin,
-			originalBoxWidth: this.props.width,
-			originalBoxHeight: this.props.height,
+			steppingMargin: props.steppingMargin,
+			originalBoxWidth: props.width,
+			originalBoxHeight: props.height,
 
 			// Width of resizable handle
-			cursorMargin: this.props.options.cursorMargin || this.props.cursorMargin,
+			cursorMargin: props.options.cursorMargin ? props.options.cursorMargin : props.cursorMargin,
 
 			// Ghost Resizing
-			allowGhostResize: this.props.options.allowGhostResize || false
-    };
+			allowGhostResize: props.options.allowGhostResize ? props.options.allowGhostResize : false
+		};
+    this._startDrag = this._startDrag.bind(this);
+    this._stopDrag = this._stopDrag.bind(this);
   }
 
   componentDidUpdate(){
@@ -75,7 +76,7 @@ class ResizableComponent extends Component {
 	}
 
 	_startDrag = (e) => {
-		this.makeParentHighlightable(false);
+    this.makeParentHighlightable(false);
 		this.setState({
 			mouseHeldDown: true,
 			originalY: e.clientY,
@@ -90,33 +91,32 @@ class ResizableComponent extends Component {
 
 	_stopDrag = (e) => {
     this.makeParentHighlightable(true);
-		// Only invoke onStopResize if this component has started resizing
-		if (this.state.mouseHeldDown && this.props.onStopResize) {
-			this.props.onStopResize(
-				(this.state.boxWidth - this.state.originalBoxWidth) / this.state.step,
-				(this.state.boxHeight - this.state.originalBoxHeight) / this.state.step
-			);
-		}
-		if (!this.state.allowGhostResize) {
-			this.setState({
-				mouseHeldDown: false,
-				initialBoxHeight: this.state.boxHeight,
-				initialBoxWidth: this.state.boxWidth
-			});
-		} else {
-			// Ghost resizing
-			// Change the dimensions back to the original
-			this.setState({
-				mouseHeldDown: false,
-				boxHeight: this.state.originalBoxHeight,
-				boxWidth: this.state.originalBoxWidth
-			});
-		}
-
+    // Only invoke onStopResize if this component has started resizing
+    if (this.state.mouseHeldDown && this.props.onStopResize) {
+      this.props.onStopResize(
+        this.state.boxWidth,
+        this.state.boxHeight
+      );
+    }
+    if (!this.state.allowGhostResize) {
+      this.setState({
+        mouseHeldDown: false,
+        initialBoxHeight: this.state.boxHeight,
+        initialBoxWidth: this.state.boxWidth
+      });
+    } else {
+      // Ghost resizing
+      // Change the dimensions back to the original
+      this.setState({
+        mouseHeldDown: false,
+        boxHeight: this.state.originalBoxHeight,
+        boxWidth: this.state.originalBoxWidth
+      });
+    }
 	}
 
 	_resizeDiv = (e) => {
-		if (this.state.mouseHeldDown) {
+    if (this.state.mouseHeldDown) {
 			var distanceY = e.clientY - this.state.originalY;
 			var distanceX = e.clientX - this.state.originalX;
 
@@ -181,7 +181,6 @@ class ResizableComponent extends Component {
 				}
 
 			});
-
     	}
 	}
 
@@ -238,18 +237,17 @@ class ResizableComponent extends Component {
 	}
 
 	render() {
-		var outerDivStyle = {
+    var outerDivStyle = {
 			backgroundColor: 'transparent',
-			width: (!this.state.allowGhostResize) ? this.state.boxWidth + 'px' :
-					(this.state.fullWidth ? '100%' : this.state.originalBoxWidth),
+			width: (!this.state.allowGhostResize) ? this.state.boxWidth + 'px' : this.state.originalBoxWidth,
 			height: (!this.state.allowGhostResize) ? this.state.boxHeight + 'px' : this.state.originalBoxHeight,
 			cursor: 'default',
 			position: 'relative'
 		};
 
 		// Merge in any custom styles and overwrite existing styles (if any)
-		if (this.props.style) {
-			var customStyles = this.props.style;
+		if (this.props.cssStyles) {
+			var customStyles = this.props.cssStyles;
 			for (var prop in customStyles) outerDivStyle[prop] = customStyles[prop];
 		}
 
@@ -263,7 +261,7 @@ class ResizableComponent extends Component {
 				display: this.state.mouseHeldDown ? 'block' : 'none',
 				backgroundColor: '#000000',
 				opacity: '0.3',
-				width: (this.state.fullWidth) ? '100%' :this.state.boxWidth + 'px',
+				width: this.state.boxWidth + 'px',
 				height: this.state.boxHeight + 'px',
 				cursor: 'default',
 				position: 'absolute',
@@ -272,11 +270,10 @@ class ResizableComponent extends Component {
 			};
 			if (this.props.ghostCssStyles) {
 				var css = this.props.ghostCssStyles
-				for (var prop in css) ghostDivStyles[prop] = css[prop];
+				for (prop in css) ghostDivStyles[prop] = css[prop];
 			}
 			highlightDiv = <div className="ghostDiv" style={ghostDivStyles}></div>;
 		}
-
 		return <div className={this.props.className} style={outerDivStyle}>
 			{highlightDiv}
 			<div className={this.props.resizeHandlerClassName} style={resizeHandlerStyle} onMouseDown={this._startDrag}></div>
