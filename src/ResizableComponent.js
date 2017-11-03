@@ -116,12 +116,12 @@ class ResizableComponent extends Component {
 			var heightCanChange = newHeight >= (this.state.minHeight - this.state.steppingMargin)
 				&& newHeight <= (this.state.maxHeight + this.state.steppingMargin) // newHeight is below maxHeight
 				&& steppingRemainderY <= this.state.steppingMargin // A little allowance is given for stepping
-				&& this.state.direction.indexOf('s') > -1;
+				&& this.props.direction.indexOf('s') > -1;
 
 			var widthCanChange = newWidth >= (this.state.minWidth - this.state.steppingMargin)
 				&& newWidth <= (this.state.maxWidth + this.state.steppingMargin)
 				&& steppingRemainderX <= this.state.steppingMargin
-				&& this.state.direction.indexOf('e') > -1;
+				&& this.props.direction.indexOf('e') > -1;
 
 			// If new dimensions are indeed lesser than the minimum constraint or greater than the maximum constraint,
 			// set the dimension to the minimum/maximum respectively
@@ -133,7 +133,7 @@ class ResizableComponent extends Component {
 			if (newWidth > this.state.maxWidth) newWidth = this.state.maxWidth;
 
 			// If lockAspectRatio is true, we programatically calculate the width
-			if (this.state.direction === 'se' && this.state.lockAspectRatio) {
+			if (this.props.direction === 'se' && this.state.lockAspectRatio) {
 				var aspectRatio = this.state.originalBoxHeight / this.state.originalBoxWidth;
 				newWidth = newHeight / aspectRatio;
 			}
@@ -173,7 +173,7 @@ class ResizableComponent extends Component {
 	getResizeHandlerStyle = () => {
 		var resizeHandlerStyle = {};
 
-		if (this.state.direction === 's') {
+		if (this.props.direction === 's') {
 			resizeHandlerStyle = {
 				width: this.state.boxWidth + 'px',
 				height: this.state.cursorMargin + 'px',
@@ -184,7 +184,7 @@ class ResizableComponent extends Component {
 			};
 		}
 
-		if (this.state.direction === 'e') {
+		if (this.props.direction === 'e') {
 			resizeHandlerStyle = {
 				width: this.state.cursorMargin + 'px',
 				height: this.state.boxHeight + 'px',
@@ -195,7 +195,7 @@ class ResizableComponent extends Component {
 			};
 		}
 
-		if (this.state.direction === 'se') {
+		if (this.props.direction === 'se') {
 			resizeHandlerStyle = {
 				width: this.state.cursorMargin + 'px',
 				height: this.state.cursorMargin + 'px',
