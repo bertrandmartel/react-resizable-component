@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { render, findDOMNode } from 'react-dom';
+import ReactDOM from 'react-dom';
 import PropTypes from 'prop-types';
 
 class ResizableComponent extends Component {
@@ -43,14 +43,17 @@ class ResizableComponent extends Component {
 
 	componentDidMount() {
     var _this = this;
+    var parentAttrName = ReactDOM.findDOMNode(this).parentNode.attributes[0].name;
+    var parentAttrValue = ReactDOM.findDOMNode(this).parentNode.attributes[0].value;
 
-    findDOMNode(this).parentNode.addEventListener('mousemove', (e) => {
+    // Attaches event listeners to parent div
+    document.querySelector('[' + parentAttrName + '="' + parentAttrValue + '"]').addEventListener('mousemove', (e) => {
       _this._resizeDiv(e);
     });
-    findDOMNode(this).parentNode.addEventListener('mouseup', (e) => {
+    document.querySelector('[' + parentAttrName + '="' + parentAttrValue + '"]').addEventListener('mouseup', (e) => {
       _this._stopDrag(e);
     });
-    findDOMNode(this).parentNode.addEventListener('mouseleave', (e) => {
+    document.querySelector('[' + parentAttrName + '="' + parentAttrValue + '"]').addEventListener('mouseleave', (e) => {
       _this._stopDrag(e);
     });
 	}
@@ -209,15 +212,19 @@ class ResizableComponent extends Component {
 
 	// Helper function to make the all components in parent non-highlight-able
 	makeParentHighlightable = (highlight) => {
-    findDOMNode(this).parentNode.style.userSelect = highlight ? 'all' : 'none';
-    findDOMNode(this).parentNode.style.mozUserSelect = highlight ? 'all' : 'none';
-    findDOMNode(this).parentNode.style.webkitUserSelect = highlight ? 'all' : 'none';
+    var parentAttrName = ReactDOM.findDOMNode(this).parentNode.attributes[0].name;
+		var parentAttrValue = ReactDOM.findDOMNode(this).parentNode.attributes[0].value;
+
+		// Attaches event listeners to parent div
+		document.querySelector('[' + parentAttrName + '="' + parentAttrValue + '"]').style.userSelect = highlight ? 'all' : 'none';
+		document.querySelector('[' + parentAttrName + '="' + parentAttrValue + '"]').style.mozUserSelect = highlight ? 'all' : 'none';
+		document.querySelector('[' + parentAttrName + '="' + parentAttrValue + '"]').style.webkitUserSelect = highlight ? 'all' : 'none';
 	}
 
 	render() {
 		var outerDivStyle = {
 			backgroundColor: 'transparent',
-			width: (!this.state.allowGhostResize) ? this.state.boxWidth + 'px' : 
+			width: (!this.state.allowGhostResize) ? this.state.boxWidth + 'px' :
 					(this.state.fullWidth ? '100%' : this.state.originalBoxWidth),
 			height: (!this.state.allowGhostResize) ? this.state.boxHeight + 'px' : this.state.originalBoxHeight,
 			cursor: 'default',
@@ -256,7 +263,7 @@ class ResizableComponent extends Component {
 
 		return <div className={this.props.className} style={outerDivStyle}>
 			{highlightDiv}
-			<div className="resize-handler" style={resizeHandlerStyle} onMouseDown={this._startDrag}></div>
+			<div className={this.props.resizeHandlerClassName} style={resizeHandlerStyle} onMouseDown={this._startDrag}></div>
 			{this.props.children}
 		</div>;
 	}
@@ -268,7 +275,7 @@ ResizableComponent.defaultProps = {
 
   height: 50,
   width: 250,
-
+  resizeHandlerClassName: 'resize-handler',
   steppingMargin: 20,
   cursorMargin: 10
 };
@@ -283,6 +290,7 @@ ResizableComponent.propTypes = {
 
   // Styling
   className: PropTypes.string,
+  resizeHandlerClassName: PropTypes.string,
   style: PropTypes.object,
   ghostCssStyles: PropTypes.object,
 
@@ -295,5 +303,5 @@ ResizableComponent.propTypes = {
   // Other options
   options: PropTypes.object
 }
-  
+
 export default ResizableComponent;
